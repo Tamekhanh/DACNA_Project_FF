@@ -300,6 +300,15 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                           colorBlendMode: BlendMode.modulate,
                         ),
                       ),
+                    if (widget.currentFrameIndex > 1)
+                      Positioned.fill(
+                        child: Image.memory(
+                          widget.allFrames[widget.currentFrameIndex - 2].image,
+                          fit: BoxFit.contain,
+                          color: Colors.white.withOpacity(0.1),
+                          colorBlendMode: BlendMode.modulate,
+                        ),
+                      ),
                   ],
 
                   // Hiển thị frame đang phát khi playback
