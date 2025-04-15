@@ -290,17 +290,40 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
               child: Stack(
                 children: [
                   // Onion skin (frame trước) — luôn kiểm tra an toàn
-                  if (!widget.isPlaying && showOnionSkin) ...[
-                    if (widget.currentFrameIndex > 0)
+                  // Nếu đang vẽ (không playback), và frame hiện tại là frame trống (vừa tạo), hiển thị lớp phủ từ frame trước
+                  if (!widget.isPlaying) ...[
+                    if (widget.currentFrameIndex > 0 &&
+                        widget.allFrames[widget.currentFrameIndex].strokes.isEmpty) // frame trống
                       Positioned.fill(
                         child: Image.memory(
                           widget.allFrames[widget.currentFrameIndex - 1].image,
                           fit: BoxFit.contain,
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withOpacity(0.25),
                           colorBlendMode: BlendMode.modulate,
                         ),
-                      ),
+                      )
+                    else if (showOnionSkin) ...[
+                      if (widget.currentFrameIndex > 0)
+                        Positioned.fill(
+                          child: Image.memory(
+                            widget.allFrames[widget.currentFrameIndex - 1].image,
+                            fit: BoxFit.contain,
+                            color: Colors.white.withOpacity(0.3),
+                            colorBlendMode: BlendMode.modulate,
+                          ),
+                        ),
+                      if (widget.currentFrameIndex > 1)
+                        Positioned.fill(
+                          child: Image.memory(
+                            widget.allFrames[widget.currentFrameIndex - 2].image,
+                            fit: BoxFit.contain,
+                            color: Colors.white.withOpacity(0.1),
+                            colorBlendMode: BlendMode.modulate,
+                          ),
+                        ),
+                    ]
                   ],
+
 
                   // Hiển thị frame đang phát khi playback
                   if (widget.isPlaying && currentFrameData != null)

@@ -1,11 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_testing/models/frame_data.dart';
+import '../models/frame_data.dart';
 
-class FrameListWidget extends StatefulWidget {
+class FrameListWidget extends StatelessWidget {
   final List<FrameData> frames;
-  final ValueChanged<int> onLoad;
-  final ValueChanged<int> onDelete;
-  final ReorderCallback onReorder;
+  final void Function(int index) onLoad;
+  final void Function(int index) onDelete;
+  final void Function(int oldIndex, int newIndex) onReorder;
 
   const FrameListWidget({
     super.key,
@@ -16,178 +17,59 @@ class FrameListWidget extends StatefulWidget {
   });
 
   @override
-  State<FrameListWidget> createState() => _FrameListWidgetState();
-}
-
-class _FrameListWidgetState extends State<FrameListWidget> {
-  int? _hoveredIndex;
-  int? _draggedIndex;
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return widget.frames.isEmpty
-        ? Center(
-      child: Text(
-        "No frames yet",
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-        ),
-      ),
-    )
-        : ReorderableListView.builder(
-      scrollController: _scrollController,
-      padding: const EdgeInsets.all(8),
-      itemCount: widget.frames.length,
-      onReorder: (oldIndex, newIndex) {
-        widget.onReorder(oldIndex, newIndex);
-        setState(() => _draggedIndex = null);
-      },
-      onReorderStart: (index) => setState(() => _draggedIndex = index),
+    return ReorderableListView.builder(
+      itemCount: frames.length,
+      onReorder: onReorder,
+      padding: const EdgeInsets.all(12), // Padding toàn bộ danh sách
       itemBuilder: (context, index) {
-        final frame = widget.frames[index];
-        return _FrameListItem(
-          key: ValueKey('frame_${frame.image.hashCode}'),
-          frame: frame,
-          index: index,
-          isHovered: _hoveredIndex == index,
-          isDragged: _draggedIndex == index,
-          onLoad: () => widget.onLoad(index),
-          onDelete: () => widget.onDelete(index),
-          onHover: (hovering) => setState(
-                () => _hoveredIndex = hovering ? index : null,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _FrameListItem extends StatelessWidget {
-  final FrameData frame;
-  final int index;
-  final bool isHovered;
-  final bool isDragged;
-  final VoidCallback onLoad;
-  final VoidCallback onDelete;
-  final ValueChanged<bool> onHover;
-
-  const _FrameListItem({
-    required super.key,
-    required this.frame,
-    required this.index,
-    required this.isHovered,
-    required this.isDragged,
-    required this.onLoad,
-    required this.onDelete,
-    required this.onHover,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => onHover(true),
-      onExit: (_) => onHover(false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: isDragged
-              ? Border.all(
-            color: Theme.of(context).colorScheme.primary,
-            width: 2,
-          )
-              : null,
-          boxShadow: isHovered
-              ? [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            )
-          ]
-              : null,
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Frame Thumbnail
-            GestureDetector(
-              onTap: onLoad,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.memory(
-                    frame.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      child: Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+        final frame = frames[index];
+        return Padding(
+          key: ValueKey(index),
+          padding: const EdgeInsets.symmetric(vertical: 8), // Khoảng cách giữa các frame
+          child: GestureDetector(
+            onTap: () => onLoad(index),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10), // Bo góc ảnh
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: frame.image.isNotEmpty
+                        ? Image.memory(
+                      frame.image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.broken_image),
+                    )
+                        : const Icon(Icons.broken_image),
+                  ),
+                ),
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: InkWell(
+                    onTap: () => onDelete(index),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-
-            // Frame Number
-            Positioned(
-              bottom: 4,
-              left: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${index + 1}',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-
-            // Delete Button (visible on hover or drag)
-            // Delete Button (always visible)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: onDelete,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

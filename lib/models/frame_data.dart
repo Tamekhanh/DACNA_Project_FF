@@ -22,9 +22,9 @@ class FrameData {
   }) {
     return FrameData(
       image: image ?? this.image,
-      strokes: strokes ?? List.from(this.strokes),
-      strokeColors: strokeColors ?? List.from(this.strokeColors),
-      strokeWidths: strokeWidths ?? List.from(this.strokeWidths),
+      strokes: strokes ?? this.strokes.map((s) => List<Offset?>.from(s)).toList(),
+      strokeColors: strokeColors ?? List<Color>.from(this.strokeColors),
+      strokeWidths: strokeWidths ?? List<double>.from(this.strokeWidths),
     );
   }
 }

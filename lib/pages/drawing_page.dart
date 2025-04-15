@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_testing/models/frame_data.dart';
 import 'package:flutter_testing/widgets/drawing_canvas.dart';
 import 'package:flutter_testing/widgets/frame_list.dart';
+import 'package:transparent_image/transparent_image.dart'; // <-- THÊM
 
 class DrawingPage extends StatefulWidget {
   const DrawingPage({super.key});
@@ -18,9 +21,21 @@ class _DrawingPageState extends State<DrawingPage> {
   final TextEditingController _fpsController = TextEditingController(text: "12");
 
   @override
-  void dispose() {
-    _fpsController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    _createInitialBlankFrame();
+  }
+
+  void _createInitialBlankFrame() {
+    final blankFrame = FrameData(
+      image: Uint8List.fromList(kTransparentImage), // <-- ảnh trong suốt
+      strokes: [],
+      strokeColors: [],
+      strokeWidths: [],
+    );
+
+    _frames.add(blankFrame);
+    _editingFrameIndex = 0;
   }
 
   void _loadFrame(int index) {
@@ -38,9 +53,20 @@ class _DrawingPageState extends State<DrawingPage> {
       } else {
         _frames.add(newFrame.copyWith());
       }
-      _editingFrameIndex = null;
+
+      // Tạo frame trống mới có lớp phủ từ ảnh vừa lưu
+      final nextBlankFrame = FrameData(
+        image: newFrame.image, // lớp phủ dùng ảnh trước
+        strokes: [],
+        strokeColors: [],
+        strokeWidths: [],
+      );
+
+      _frames.add(nextBlankFrame);
+      _editingFrameIndex = _frames.length - 1; // chuyển sang frame trống mới
     });
   }
+
 
   void _deleteFrame(int index) {
     if (index >= 0 && index < _frames.length) {
@@ -72,6 +98,12 @@ class _DrawingPageState extends State<DrawingPage> {
   }
 
   void _togglePanel() => setState(() => _isPanelVisible = !_isPanelVisible);
+
+  @override
+  void dispose() {
+    _fpsController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +196,6 @@ class _DrawingPageState extends State<DrawingPage> {
               onClear: _clearCurrentDrawing,
               fpsController: _fpsController,
             ),
-
           ),
         ],
       ),
