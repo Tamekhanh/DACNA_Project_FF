@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/frame_data.dart';
 import 'bottom_toolbar.dart';
 
@@ -18,6 +17,13 @@ class DrawingCanvas extends StatefulWidget {
   final List<FrameData> allFrames;
   final int currentFrameIndex;
 
+  final Color selectedColor;
+  final double strokeWidth;
+  final bool isEraserMode;
+  final ValueChanged<Color> onColorChanged;
+  final ValueChanged<double> onStrokeWidthChanged;
+  final ValueChanged<bool> onEraserModeChanged;
+
   const DrawingCanvas({
     super.key,
     required this.initialFrame,
@@ -28,6 +34,12 @@ class DrawingCanvas extends StatefulWidget {
     required this.fpsController,
     required this.allFrames,
     required this.currentFrameIndex,
+    required this.selectedColor,
+    required this.strokeWidth,
+    required this.isEraserMode,
+    required this.onColorChanged,
+    required this.onStrokeWidthChanged,
+    required this.onEraserModeChanged,
   });
 
   @override
@@ -39,9 +51,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   late List<List<Offset?>> strokes;
   late List<Color> strokeColors;
   late List<double> strokeWidths;
-  Color selectedColor = Colors.blue;
-  bool isEraserMode = false;
-  double strokeWidth = 5.0;
   Rect? drawingArea;
   int fps = 12;
   int currentFrame = 0;
@@ -68,7 +77,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   @override
   void didUpdateWidget(covariant DrawingCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (widget.initialFrame != oldWidget.initialFrame) {
       _saveCurrentStateToUndoStack();
       _initializeDrawingData();
@@ -79,49 +87,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     } else {
       _stopPlayback();
     }
-  }
-
-  Future<Uint8List> _resizeTo16_9(ui.Image image) async {
-    final width = image.width;
-    final targetHeight = (width * 9 / 16).round();
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-
-    if (image.height > targetHeight) {
-      final cropY = (image.height - targetHeight) ~/ 2;
-      canvas.drawImageRect(
-        image,
-        Rect.fromLTWH(0, cropY.toDouble(), width.toDouble(), targetHeight.toDouble()),
-        Rect.fromLTWH(0, 0, width.toDouble(), targetHeight.toDouble()),
-        Paint(),
-      );
-    } else {
-      final targetWidth = (image.height * 16 / 9).round();
-      canvas.drawRect(
-        Rect.fromLTWH(0, 0, targetWidth.toDouble(), image.height.toDouble()),
-        Paint()..color = Colors.white,
-      );
-      final offsetX = (targetWidth - image.width) ~/ 2;
-      canvas.drawImage(
-        image,
-        Offset(offsetX.toDouble(), 0),
-        Paint(),
-      );
-    }
-
-    final newImage = await recorder.endRecording().toImage(
-      image.width,
-      targetHeight,
-    );
-    final byteData = await newImage.toByteData(format: ui.ImageByteFormat.png);
-    return byteData!.buffer.asUint8List();
-  }
-
-  Future<Uint8List> captureImage() async {
-    RenderRepaintBoundary boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage();
-    return await _resizeTo16_9(image);
   }
 
   void _saveCurrentStateToUndoStack() {
@@ -145,6 +110,41 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     }
   }
 
+  Future<Uint8List> _resizeTo16_9(ui.Image image) async {
+    final width = image.width;
+    final targetHeight = (width * 9 / 16).round();
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    if (image.height > targetHeight) {
+      final cropY = (image.height - targetHeight) ~/ 2;
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTWH(0, cropY.toDouble(), width.toDouble(), targetHeight.toDouble()),
+        Rect.fromLTWH(0, 0, width.toDouble(), targetHeight.toDouble()),
+        Paint(),
+      );
+    } else {
+      final targetWidth = (image.height * 16 / 9).round();
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, targetWidth.toDouble(), image.height.toDouble()),
+        Paint()..color = Colors.white,
+      );
+      final offsetX = (targetWidth - image.width) ~/ 2;
+      canvas.drawImage(image, Offset(offsetX.toDouble(), 0), Paint());
+    }
+
+    final newImage = await recorder.endRecording().toImage(image.width, targetHeight);
+    final byteData = await newImage.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  Future<Uint8List> captureImage() async {
+    RenderRepaintBoundary boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage();
+    return await _resizeTo16_9(image);
+  }
+
   Future<void> saveImage() async {
     final pngBytes = await captureImage();
     final newFrame = FrameData(
@@ -153,7 +153,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
       strokeColors: List.from(strokeColors),
       strokeWidths: List.from(strokeWidths),
     );
-
     widget.onSave(newFrame);
 
     if (widget.initialFrame == null) {
@@ -209,14 +208,15 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   }
 
   void _showColorPicker() {
+    Color tempColor = widget.selectedColor;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Choose color'),
         content: SingleChildScrollView(
           child: ColorPicker(
-            pickerColor: selectedColor,
-            onColorChanged: (color) => setState(() => selectedColor = color),
+            pickerColor: tempColor,
+            onColorChanged: (color) => setState(() => tempColor = color),
             enableAlpha: false,
             showLabel: true,
             pickerAreaHeightPercent: 0.8,
@@ -224,7 +224,10 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              widget.onColorChanged(tempColor);
+              Navigator.of(context).pop();
+            },
             child: const Text('OK'),
           ),
         ],
@@ -233,8 +236,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   }
 
   void _showBrushSizeDialog() {
-    double tempValue = strokeWidth; // Biến tạm để điều khiển slider mượt
-
+    double tempValue = widget.strokeWidth;
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -249,20 +251,15 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                 max: 50,
                 divisions: 49,
                 label: tempValue.round().toString(),
-                onChanged: (value) {
-                  setStateDialog(() => tempValue = value); // Cập nhật trong dialog
-                },
+                onChanged: (value) => setStateDialog(() => tempValue = value),
               ),
-              Text(
-                '${tempValue.round()}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('${tempValue.round()}'),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                setState(() => strokeWidth = tempValue); // Cập nhật thật khi nhấn OK
+                widget.onStrokeWidthChanged(tempValue);
                 Navigator.of(context).pop();
               },
               child: const Text('OK'),
@@ -272,7 +269,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -289,43 +285,26 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
               ),
               child: Stack(
                 children: [
-                  // Onion skin (frame trước) — luôn kiểm tra an toàn
-                  // Nếu đang vẽ (không playback), và frame hiện tại là frame trống (vừa tạo), hiển thị lớp phủ từ frame trước
-                  if (!widget.isPlaying) ...[
-                    if (widget.currentFrameIndex > 0 &&
-                        widget.allFrames[widget.currentFrameIndex].strokes.isEmpty) // frame trống
+                  if (!widget.isPlaying && showOnionSkin) ...[
+                    if (widget.currentFrameIndex > 0)
                       Positioned.fill(
                         child: Image.memory(
                           widget.allFrames[widget.currentFrameIndex - 1].image,
                           fit: BoxFit.contain,
-                          color: Colors.white.withOpacity(0.25),
+                          color: Colors.white.withOpacity(0.3),
                           colorBlendMode: BlendMode.modulate,
                         ),
-                      )
-                    else if (showOnionSkin) ...[
-                      if (widget.currentFrameIndex > 0)
-                        Positioned.fill(
-                          child: Image.memory(
-                            widget.allFrames[widget.currentFrameIndex - 1].image,
-                            fit: BoxFit.contain,
-                            color: Colors.white.withOpacity(0.3),
-                            colorBlendMode: BlendMode.modulate,
-                          ),
+                      ),
+                    if (widget.currentFrameIndex > 1)
+                      Positioned.fill(
+                        child: Image.memory(
+                          widget.allFrames[widget.currentFrameIndex - 2].image,
+                          fit: BoxFit.contain,
+                          color: Colors.white.withOpacity(0.1),
+                          colorBlendMode: BlendMode.modulate,
                         ),
-                      if (widget.currentFrameIndex > 1)
-                        Positioned.fill(
-                          child: Image.memory(
-                            widget.allFrames[widget.currentFrameIndex - 2].image,
-                            fit: BoxFit.contain,
-                            color: Colors.white.withOpacity(0.1),
-                            colorBlendMode: BlendMode.modulate,
-                          ),
-                        ),
-                    ]
+                      ),
                   ],
-
-
-                  // Hiển thị frame đang phát khi playback
                   if (widget.isPlaying && currentFrameData != null)
                     Positioned.fill(
                       child: Image.memory(
@@ -333,8 +312,6 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                         fit: BoxFit.contain,
                       ),
                     ),
-
-                  // Cho phép vẽ nếu không đang play
                   if (!widget.isPlaying)
                     GestureDetector(
                       onPanStart: (details) {
@@ -342,8 +319,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                           _saveCurrentStateToUndoStack();
                           setState(() {
                             strokes.add([details.localPosition]);
-                            strokeColors.add(isEraserMode ? Colors.white : selectedColor);
-                            strokeWidths.add(strokeWidth);
+                            strokeColors.add(widget.isEraserMode ? Colors.white : widget.selectedColor);
+                            strokeWidths.add(widget.strokeWidth);
                           });
                         }
                       },
@@ -360,9 +337,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             final renderBox = context.findRenderObject() as RenderBox?;
                             if (renderBox != null) {
-                              drawingArea = renderBox.size.isEmpty
-                                  ? null
-                                  : Offset.zero & renderBox.size;
+                              drawingArea = renderBox.size.isEmpty ? null : Offset.zero & renderBox.size;
                             }
                           });
                           return RepaintBoundary(
@@ -377,17 +352,16 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                     ),
                 ],
               ),
-
             ),
           ),
         ),
         BottomToolbar(
-          selectedColor: selectedColor,
-          isEraserMode: isEraserMode,
-          strokeWidth: strokeWidth,
+          selectedColor: widget.selectedColor,
+          isEraserMode: widget.isEraserMode,
+          strokeWidth: widget.strokeWidth,
           isPlaying: widget.isPlaying,
           showOnionSkin: showOnionSkin,
-          onToggleEraser: () => setState(() => isEraserMode = !isEraserMode),
+          onToggleEraser: () => widget.onEraserModeChanged(!widget.isEraserMode),
           onColorTap: _showColorPicker,
           onBrushSizeTap: _showBrushSizeDialog,
           onSave: saveImage,

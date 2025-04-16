@@ -56,150 +56,154 @@ class BottomToolbar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Color Picker
-            _ToolbarButton(
-              tooltip: 'Color Picker',
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: selectedColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                    width: 2,
-                  ),
-                ),
-              ),
-              onTap: onColorTap,
-            ),
-            const SizedBox(width: 8),
-
-            // Brush Size
-            _ToolbarButton(
-              tooltip: 'Brush Size (${strokeWidth.round()})',
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                    width: 2,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    strokeWidth.round().toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
+            Row (
+              spacing: 8,
+              children: [
+                // Color Picker
+                _ToolbarButton(
+                  tooltip: 'Color Picker',
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: selectedColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 2,
+                      ),
                     ),
                   ),
+                  onTap: onColorTap,
                 ),
-              ),
-              onTap: onBrushSizeTap,
-            ),
-            const SizedBox(width: 8),
 
-            // Eraser/Brush Toggle
-            _ToolbarButton(
-              tooltip: isEraserMode ? 'Switch to Brush' : 'Switch to Eraser',
-              child: Icon(
-                isEraserMode ? Icons.brush : FontAwesomeIcons.eraser,
-                size: 20,
-              ),
-              onTap: onToggleEraser,
-            ),
-            const SizedBox(width: 8),
-
-            // Undo/Redo Buttons
-            _ToolbarButton(
-              tooltip: 'Undo',
-              child: const Icon(Icons.undo, size: 20),
-              onTap: onUndo,
-            ),
-            _ToolbarButton(
-              tooltip: 'Redo',
-              child: const Icon(Icons.redo, size: 20),
-              onTap: onRedo,
-            ),
-            const SizedBox(width: 8),
-
-            // Clear Button
-            _ToolbarButton(
-              tooltip: 'Clear Canvas',
-              child: const Icon(Icons.clear, size: 20),
-              onTap: onClear,
-            ),
-            const SizedBox(width: 8),
-
-            // Onion Skin Toggle
-            _ToolbarButton(
-              tooltip: showOnionSkin ? 'Hide Onion Skin' : 'Show Onion Skin',
-              child: Icon(
-                showOnionSkin ? Icons.visibility : Icons.visibility_off,
-                size: 20,
-              ),
-              onTap: onToggleOnionSkin,
-            ),
-            const SizedBox(width: 12),
-
-            // FPS Control
-            SizedBox(
-              width: 80,
-              child: TextField(
-                controller: TextEditingController(text: fpsValue),
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "FPS",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.outline,
+                // Brush Size
+                _ToolbarButton(
+                  tooltip: 'Brush Size (${strokeWidth.round()})',
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        strokeWidth.round().toString(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
                     ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  isDense: true,
+                  onTap: onBrushSizeTap,
                 ),
-                onChanged: onFpsChanged,
-              ),
-            ),
-            const Spacer(),
 
-            // Save Button
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                // Eraser/Brush Toggle
+                _ToolbarButton(
+                  tooltip: isEraserMode ? 'Switch to Brush' : 'Switch to Eraser',
+                  child: Icon(
+                    isEraserMode ? Icons.brush : FontAwesomeIcons.eraser,
+                    size: 20,
+                  ),
+                  onTap: onToggleEraser,
                 ),
-              ),
-              onPressed: onSave,
-              icon: const Icon(Icons.save, size: 18),
-              label: const Text("Save Frame"),
-            ),
-            const SizedBox(width: 12),
 
-            // Play/Pause Button
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: isPlaying
-                    ? Theme.of(context).colorScheme.errorContainer
-                    : Theme.of(context).colorScheme.primaryContainer,
-                foregroundColor: isPlaying
-                    ? Theme.of(context).colorScheme.onErrorContainer
-                    : Theme.of(context).colorScheme.onPrimaryContainer,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                // Undo/Redo Buttons
+                _ToolbarButton(
+                  tooltip: 'Undo',
+                  child: const Icon(Icons.undo, size: 20),
+                  onTap: onUndo,
                 ),
-              ),
-              onPressed: onPlay,
-              icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow, size: 18),
-              label: Text(isPlaying ? "Stop" : "Play"),
+                _ToolbarButton(
+                  tooltip: 'Redo',
+                  child: const Icon(Icons.redo, size: 20),
+                  onTap: onRedo,
+                ),
+
+                // Clear Button
+                _ToolbarButton(
+                  tooltip: 'Clear Canvas',
+                  child: const Icon(Icons.clear, size: 20),
+                  onTap: onClear,
+                ),
+
+                // Onion Skin Toggle
+                _ToolbarButton(
+                  tooltip: showOnionSkin ? 'Hide Onion Skin' : 'Show Onion Skin',
+                  child: Icon(
+                    showOnionSkin ? Icons.visibility : Icons.visibility_off,
+                    size: 20,
+                  ),
+                  onTap: onToggleOnionSkin,
+                ),
+              ],
             ),
+
+            Row (
+              spacing: 8,
+              children: [
+                // FPS Control
+                SizedBox(
+                  width: 80,
+                  child: TextField(
+                    controller: TextEditingController(text: fpsValue),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "FPS",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      isDense: true,
+                    ),
+                    onChanged: onFpsChanged,
+                  ),
+                ),
+
+                // Save Button
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: onSave,
+                  icon: const Icon(Icons.save, size: 18),
+                  label: const Text("Save Frame"),
+                ),
+
+                // Play/Pause Button
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: isPlaying
+                        ? Theme.of(context).colorScheme.errorContainer
+                        : Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor: isPlaying
+                        ? Theme.of(context).colorScheme.onErrorContainer
+                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: onPlay,
+                  icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow, size: 18),
+                  label: Text(isPlaying ? "Stop" : "Play"),
+                ),
+              ],
+            ),
+
           ],
         ),
       ),

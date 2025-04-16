@@ -18,6 +18,9 @@ class _DrawingPageState extends State<DrawingPage> {
   int? _editingFrameIndex;
   bool _isPlaying = false;
   bool _isPanelVisible = true;
+  Color _selectedColor = Colors.blue;
+  double _strokeWidth = 5.0;
+  bool _isEraserMode = false;
   final TextEditingController _fpsController = TextEditingController(text: "12");
 
   @override
@@ -195,7 +198,16 @@ class _DrawingPageState extends State<DrawingPage> {
               onTogglePlayback: _togglePlayback,
               onClear: _clearCurrentDrawing,
               fpsController: _fpsController,
+
+              // Giữ lại trạng thái từ frame này sang frame khác
+              selectedColor: _selectedColor,
+              strokeWidth: _strokeWidth,
+              isEraserMode: _isEraserMode,
+              onColorChanged: (color) => setState(() => _selectedColor = color),
+              onStrokeWidthChanged: (width) => setState(() => _strokeWidth = width),
+              onEraserModeChanged: (value) => setState(() => _isEraserMode = value),
             ),
+
           ),
         ],
       ),
