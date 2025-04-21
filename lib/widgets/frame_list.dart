@@ -31,18 +31,21 @@ class FrameListWidget extends StatelessWidget {
             onTap: () => onLoad(index),
             child: Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10), // Bo góc ảnh
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: frame.image.isNotEmpty
-                        ? Image.memory(
-                      frame.image,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image),
-                    )
-                        : const Icon(Icons.broken_image),
+                Container(
+                  color: Colors.white,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10), // Bo góc ảnh
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: frame.image.isNotEmpty
+                          ? Image.memory(
+                        frame.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.broken_image),
+                      )
+                          : const Icon(Icons.broken_image),
+                    ),
                   ),
                 ),
                 Positioned(
