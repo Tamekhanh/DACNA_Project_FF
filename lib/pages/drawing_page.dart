@@ -21,7 +21,9 @@ class _DrawingPageState extends State<DrawingPage> {
   Color _selectedColor = Colors.blue;
   double _strokeWidth = 5.0;
   bool _isEraserMode = false;
-  final TextEditingController _fpsController = TextEditingController(text: "12");
+  final TextEditingController _fpsController = TextEditingController(
+    text: "12",
+  );
 
   @override
   void initState() {
@@ -70,7 +72,6 @@ class _DrawingPageState extends State<DrawingPage> {
     });
   }
 
-
   void _deleteFrame(int index) {
     if (index >= 0 && index < _frames.length) {
       setState(() {
@@ -93,9 +94,9 @@ class _DrawingPageState extends State<DrawingPage> {
       _isPlaying = !_isPlaying;
       if (_isPlaying && _frames.isEmpty) {
         _isPlaying = false;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No frames to play')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No frames to play')));
       }
     });
   }
@@ -112,102 +113,229 @@ class _DrawingPageState extends State<DrawingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("🎨 Drawing Animation"),
+        backgroundColor: Color(0xFF43474E),
+        title: const Text(
+          'Drawing Animation',
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFE1E2E9)
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.list),
+            color: Color(0xFFE1E2E9),
             onPressed: _togglePanel,
             tooltip: 'Toggle Frames Panel',
-          ),
+          ), //Nút hiện/ẩn danh sách frame
           IconButton(
             icon: Icon(_isPlaying ? Icons.stop : Icons.play_arrow),
+            color: Color(0xFFE1E2E9),
             onPressed: _frames.isNotEmpty ? _togglePlayback : null,
             tooltip: _isPlaying ? 'Stop' : 'Play',
-          ),
+          ), //Nút phát/dừng
           IconButton(
             icon: const Icon(Icons.clear),
+            color: Color(0xFFE1E2E9),
             onPressed: _clearCurrentDrawing,
             tooltip: 'Clear Drawing',
-          ),
+          ), //Nút xóa hình vẽ
         ],
       ),
-      body: Row(
+      body: Column(
         children: [
-          if (_isPanelVisible)
-            Container(
-              width: 200,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                border: Border(
-                  right: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                    width: 1,
-                  ),
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            color: Color(0xFF43474E),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add settings logic
                 ),
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Frames (${_frames.length})',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                IconButton(
+                  icon: const Icon(Icons.save),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add save logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add share logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.undo),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add share logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.redo),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add redo logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.select_all),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add select_all logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.format_color_fill),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add color logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.question_mark),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.colorize),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.square_outlined),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.brightness_1_outlined),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                IconButton(
+                  icon: const Icon(Icons.change_history),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  icon: const Icon(Icons.mic),
+                  color: Color(0xFFE1E2E9),
+                  onPressed: () {}, // TODO: Add logic
+                ),
+              ],
+            ),
+          ),
+          // Body chính
+          Expanded(
+            child: Row(
+              children: [
+                if (_isPanelVisible)
+                  Container(
+                    margin: const EdgeInsets.only(right: 2, top: 2),
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: Color(0xFF43474E),
+                      border: Border(
+                        right: BorderSide(
+                          color: Theme.of(context).dividerColor,
+                          width: 1,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: FrameListWidget(
-                      frames: _frames,
-                      onLoad: _loadFrame,
-                      onDelete: _deleteFrame,
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          if (newIndex > oldIndex) newIndex--;
-                          final item = _frames.removeAt(oldIndex);
-                          _frames.insert(newIndex, item);
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Frames (${_frames.length})',
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold,
+                            color: Color(0xFFE1E2E9),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: FrameListWidget(
+                            frames: _frames,
+                            onLoad: _loadFrame,
+                            onDelete: _deleteFrame,
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+                                if (newIndex > oldIndex) newIndex--;
+                                final item = _frames.removeAt(oldIndex);
+                                _frames.insert(newIndex, item);
 
-                          if (_editingFrameIndex == oldIndex) {
-                            _editingFrameIndex = newIndex;
-                          } else if (_editingFrameIndex != null) {
-                            if (_editingFrameIndex! > oldIndex &&
-                                _editingFrameIndex! <= newIndex) {
-                              _editingFrameIndex = _editingFrameIndex! - 1;
-                            } else if (_editingFrameIndex! >= newIndex &&
-                                _editingFrameIndex! < oldIndex) {
-                              _editingFrameIndex = _editingFrameIndex! + 1;
-                            }
-                          }
-                        });
-                      },
+                                if (_editingFrameIndex == oldIndex) {
+                                  _editingFrameIndex = newIndex;
+                                } else if (_editingFrameIndex != null) {
+                                  if (_editingFrameIndex! > oldIndex &&
+                                      _editingFrameIndex! <= newIndex) {
+                                    _editingFrameIndex =
+                                        _editingFrameIndex! - 1;
+                                  } else if (_editingFrameIndex! >= newIndex &&
+                                      _editingFrameIndex! < oldIndex) {
+                                    _editingFrameIndex =
+                                        _editingFrameIndex! + 1;
+                                  }
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          Expanded(
-            child: DrawingCanvas(
-              key: ValueKey(_editingFrameIndex),
-              initialFrame: _editingFrameIndex != null
-                  ? _frames[_editingFrameIndex!].copyWith()
-                  : null,
-              currentFrameIndex: _editingFrameIndex ?? 0,
-              allFrames: _frames,
-              onSave: _saveFrame,
-              isPlaying: _isPlaying,
-              onTogglePlayback: _togglePlayback,
-              onClear: _clearCurrentDrawing,
-              fpsController: _fpsController,
+                Expanded(
+                  child: DrawingCanvas(
+                    key: ValueKey(_editingFrameIndex),
+                    initialFrame:
+                        _editingFrameIndex != null
+                            ? _frames[_editingFrameIndex!].copyWith()
+                            : null,
+                    currentFrameIndex: _editingFrameIndex ?? 0,
+                    allFrames: _frames,
+                    onSave: _saveFrame,
+                    isPlaying: _isPlaying,
+                    onTogglePlayback: _togglePlayback,
+                    onClear: _clearCurrentDrawing,
+                    fpsController: _fpsController,
 
-              // Giữ lại trạng thái từ frame này sang frame khác
-              selectedColor: _selectedColor,
-              strokeWidth: _strokeWidth,
-              isEraserMode: _isEraserMode,
-              onColorChanged: (color) => setState(() => _selectedColor = color),
-              onStrokeWidthChanged: (width) => setState(() => _strokeWidth = width),
-              onEraserModeChanged: (value) => setState(() => _isEraserMode = value),
+                    // Giữ lại trạng thái từ frame này sang frame khác
+                    selectedColor: _selectedColor,
+                    strokeWidth: _strokeWidth,
+                    isEraserMode: _isEraserMode,
+                    onColorChanged:
+                        (color) => setState(() => _selectedColor = color),
+                    onStrokeWidthChanged:
+                        (width) => setState(() => _strokeWidth = width),
+                    onEraserModeChanged:
+                        (value) => setState(() => _isEraserMode = value),
+                  ),
+                ),
+              ],
             ),
-
           ),
         ],
       ),
